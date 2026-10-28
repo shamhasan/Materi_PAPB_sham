@@ -8,6 +8,7 @@ import ih.pam.tobearsitekturpapb.data.remote.dto.toStudent
 interface StudentRepository {
     fun getStudentById(id: Int, callback: (Result<Student>) -> Unit)
     fun getStudents(callback: (Result<List<Student>>) -> Unit)
+    fun searchStudents(query: String, callback: (Result<List<Student>>) -> Unit)
 }
 
 class DefaultStudentRepository(
@@ -29,5 +30,12 @@ class DefaultStudentRepository(
         }
     }
 
-
+    override fun searchStudents(
+        query: String,
+        callback: (Result<List<Student>>) -> Unit,
+    ) {
+        remoteDataSource.searchStudents(query) { result ->
+            callback(result.map { users -> users.map { it.toStudent() } })
+        }
+    }
 }

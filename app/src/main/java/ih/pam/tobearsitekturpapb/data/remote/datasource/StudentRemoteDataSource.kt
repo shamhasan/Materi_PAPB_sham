@@ -25,7 +25,7 @@ class StudentRemoteDataSource(private val api: StudentApiService) {
         })
     }
 
-    fun getStudent(id: Int, callback: (Result<UserDto>) -> Unit){
+    fun getStudent(id: Int, callback: (Result<UserDto>) -> Unit) {
         api.getUser(id).enqueue(object : retrofit2.Callback<UserDto> {
             override fun onResponse(call: Call<UserDto?>, response: Response<UserDto?>) {
                 val body = response.body()
@@ -37,9 +37,25 @@ class StudentRemoteDataSource(private val api: StudentApiService) {
             }
 
             override fun onFailure(call: Call<UserDto?>, t: Throwable) {
-               callback(Result.failure(t))
+                callback(Result.failure(t))
             }
         })
 
+    }
+    fun searchStudents(query: String, callback: (Result<List<UserDto>>) -> Unit){
+        api.searchUser(query = query).enqueue(object : retrofit2.Callback<UserResponse> {
+            override fun onResponse(call: Call<UserResponse?>, response: Response<UserResponse?>) {
+                val body = response.body()
+                if (response.isSuccessful && body != null) {
+                    callback(Result.success(body.users))
+                } else {
+                    callback(Result.failure(Exception(response.message())))
+                }
+            }
+
+            override fun onFailure(call: Call<UserResponse?>, t: Throwable) {
+                callback(Result.failure(t))
+            }
+        })
     }
 }

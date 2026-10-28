@@ -20,12 +20,42 @@ class HomeViewModel(
     fun fetchAllStudents() {
         uiState = uiState.copy(isLoading = true, errorMsg = null)
         repository.getStudents { result ->
-            result.onSuccess { data -> uiState = HomeUiState(students = data) }
-                .onFailure { error ->
-                    uiState = HomeUiState(errorMsg = error.message ?: "Gagal mengambil data")
-                }
+            result.onSuccess { data -> uiState = HomeUiState(students = data) }.onFailure { error ->
+                uiState = HomeUiState(errorMsg = error.message ?: "Gagal mengambil data")
+            }
+        }
+    }
+
+    fun searchStudents(query: String) {
+        if (query.isBlank()) {
+            fetchAllStudents()
+            return
         }
 
+        uiState = uiState.copy(
+            isLoading = true,
+            errorMsg = null
+        )
+        repository.searchStudents(query = query) { result ->
+            result.onSuccess { data ->
+                if (data == null || data.isEmpty()) {
+                    uiState = uiState.copy(
+                        isLoading = false,
+                        isEmpty = true
+                    )
+                    return@onSuccess
+                }
+                uiState = uiState.copy(
+                    isLoading = false,
+                    students = data
+                )
+            }.onFailure { error ->
+                uiState = uiState.copy(
+                    isLoading = false,
+                    errorMsg = error.message ?: "Gagal mengambil data"
+                )
+            }
+        }
     }
 
     companion object {
@@ -38,3 +68,4 @@ class HomeViewModel(
             }
     }
 }
+

@@ -41,7 +41,8 @@ fun NavigationLabApp() {
             HomeScreen(
                 uiState = homeVM.uiState,
                 onStudentClick = {id-> navController.navigate(Routes.detail(id))},
-                onRetry = homeVM::fetchAllStudents
+                onRetry = homeVM::fetchAllStudents,
+                onSearchClick = homeVM::searchStudents
             )
         }
         composable(

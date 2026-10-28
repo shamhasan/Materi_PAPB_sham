@@ -15,4 +15,9 @@ interface StudentApiService {
     fun getUser(
         @Path("id") id: Int
     ): Call<UserDto>
+
+    @GET("users/search")
+    fun searchUser(
+        @Query("q") query: String,
+    ): Call<UserResponse>
 }
