@@ -5,20 +5,31 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import ih.pam.tobearsitekturpapb.data.repository.StudentRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import java.lang.reflect.Array.set
+import kotlin.coroutines.cancellation.CancellationException
 
 class DetailViewModel(private val repository: StudentRepository) : ViewModel() {
-    var uiState by mutableStateOf(DetailUiState())
-        private set
+    private val _uiState = MutableStateFlow(DetailUiState())
+    val uiState: StateFlow<DetailUiState> = _uiState.asStateFlow()
 
     fun loadStudent(id: Int) {
-       uiState = uiState.copy(isLoading = true, errorMsg = null)
 
-        repository.getStudentById(id){
-            result -> result.onSuccess { student -> uiState = DetailUiState(student = student) }.onFailure { error -> uiState =
-            DetailUiState(errorMsg = error.message ?: "Data tidak tersedia")
-        }
+        viewModelScope.launch {
+            _uiState.value = DetailUiState(isLoading = true)
+            try {
+                val student = repository.getStudentById(id)
+                _uiState.value = DetailUiState(student = student)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _uiState.value = DetailUiState(errorMsg = e.message ?: "Gagal mengambil data")
+            }
         }
     }
 

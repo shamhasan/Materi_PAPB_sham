@@ -8,54 +8,14 @@ import retrofit2.Call
 import retrofit2.Response
 
 class StudentRemoteDataSource(private val api: StudentApiService) {
-    fun getStudents(callback: (Result<List<UserDto>>) -> Unit) {
-        api.getUsers().enqueue(object : retrofit2.Callback<UserResponse> {
-            override fun onResponse(call: Call<UserResponse?>, response: Response<UserResponse?>) {
-                val body = response.body()
-                if (response.isSuccessful && body != null) {
-                    callback(Result.success(body.users))
-                } else {
-                    callback(Result.failure(Exception(response.message())))
-                }
-            }
+    suspend fun getStudents(): List<UserDto> =
+        api.getUsers(limit = 30).users
 
-            override fun onFailure(call: Call<UserResponse?>, t: Throwable) {
-                callback(Result.failure(t))
-            }
-        })
-    }
+    suspend fun getStudent(id: Int): UserDto =
+        api.getUser(
+            id = id
+        )
 
-    fun getStudent(id: Int, callback: (Result<UserDto>) -> Unit) {
-        api.getUser(id).enqueue(object : retrofit2.Callback<UserDto> {
-            override fun onResponse(call: Call<UserDto?>, response: Response<UserDto?>) {
-                val body = response.body()
-                if (response.isSuccessful && body != null) {
-                    callback(Result.success(body))
-                } else {
-                    callback(Result.failure(Exception("HTTP ${response.code()}")))
-                }
-            }
-
-            override fun onFailure(call: Call<UserDto?>, t: Throwable) {
-                callback(Result.failure(t))
-            }
-        })
-
-    }
-    fun searchStudents(query: String, callback: (Result<List<UserDto>>) -> Unit){
-        api.searchUser(query = query).enqueue(object : retrofit2.Callback<UserResponse> {
-            override fun onResponse(call: Call<UserResponse?>, response: Response<UserResponse?>) {
-                val body = response.body()
-                if (response.isSuccessful && body != null) {
-                    callback(Result.success(body.users))
-                } else {
-                    callback(Result.failure(Exception(response.message())))
-                }
-            }
-
-            override fun onFailure(call: Call<UserResponse?>, t: Throwable) {
-                callback(Result.failure(t))
-            }
-        })
-    }
+    suspend fun searchStudents(query: String): List<UserDto> =
+        api.searchUser(query).users
 }

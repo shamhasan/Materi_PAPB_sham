@@ -9,15 +9,15 @@ import retrofit2.http.Query
 
 interface StudentApiService {
     @GET("users")
-    fun getUsers(@Query("limit") limit: Int = 10): Call<UserResponse>
+    suspend fun getUsers(@Query("limit") limit: Int = 10): UserResponse
 
     @GET("users/{id}")
-    fun getUser(
-        @Path("id") id: Int
-    ): Call<UserDto>
+    suspend fun getUser(
+        @Path("id") id: Int,
+    ): UserDto
 
     @GET("users/search")
-    fun searchUser(
+    suspend fun searchUser(
         @Query("q") query: String,
-    ): Call<UserResponse>
+    ): UserResponse
 }
