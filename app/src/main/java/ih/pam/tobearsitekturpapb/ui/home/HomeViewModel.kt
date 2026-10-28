@@ -18,20 +18,23 @@ class HomeViewModel(
     }
 
     fun fetchAllStudents() {
-        val student = repository.getStudents();
-        uiState = if (student != null) {
-            HomeUiState(students = student)
-        } else {
-            HomeUiState(errorMsg = "Data Student Masih Kosong")
+        uiState = uiState.copy(isLoading = true, errorMsg = null)
+        repository.getStudents { result ->
+            result.onSuccess { data -> uiState = HomeUiState(students = data) }
+                .onFailure { error ->
+                    uiState = HomeUiState(errorMsg = error.message ?: "Gagal mengambil data")
+                }
         }
+
     }
 
-    companion object{
-        fun factory(repository: StudentRepository): ViewModelProvider.Factory = object : ViewModelProvider.Factory{
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return HomeViewModel(repository) as T
+    companion object {
+        fun factory(repository: StudentRepository): ViewModelProvider.Factory =
+            object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return HomeViewModel(repository) as T
+                }
             }
-        }
     }
 }

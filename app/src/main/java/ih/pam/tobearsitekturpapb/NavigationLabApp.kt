@@ -10,6 +10,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import ih.pam.tobearsitekturpapb.data.datasource.StudentLocalDataSource
+import ih.pam.tobearsitekturpapb.data.remote.RetrofitClient
+import ih.pam.tobearsitekturpapb.data.remote.datasource.StudentRemoteDataSource
 import ih.pam.tobearsitekturpapb.data.repository.DefaultStudentRepository
 import ih.pam.tobearsitekturpapb.ui.detail.DetailViewModel
 import ih.pam.tobearsitekturpapb.ui.home.HomeUiState
@@ -22,7 +24,8 @@ import ih.pam.tobearsitekturpapb.ui.screens.ProfileScreen
 @Composable
 fun NavigationLabApp() {
     val dataSource = remember { StudentLocalDataSource() }
-    val repository = remember { DefaultStudentRepository(dataSource) }
+    val remoteDataSource = remember { StudentRemoteDataSource(RetrofitClient.apiService) }
+    val repository = remember { DefaultStudentRepository(remoteDataSource) }
 
     val navController = rememberNavController()
     NavHost(
@@ -36,14 +39,9 @@ fun NavigationLabApp() {
             LaunchedEffect(Unit) { homeVM.fetchAllStudents() }
 
             HomeScreen(
-                onOpenDetail = { id ->
-                    navController.navigate(Routes.detail(id))
-                },
-
-                onOpenProfile = {
-                    navController.navigate(Routes.PROFILE)
-                },
-                uiState = homeVM.uiState
+                uiState = homeVM.uiState,
+                onStudentClick = {id-> navController.navigate(Routes.detail(id))},
+                onRetry = homeVM::fetchAllStudents
             )
         }
         composable(
