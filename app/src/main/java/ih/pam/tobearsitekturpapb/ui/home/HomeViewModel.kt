@@ -92,6 +92,35 @@ class HomeViewModel(
                 }else{
                     repository.searchStudents(query)
                 }
+                _uiState.value = _uiState.value.copy(
+                    students = data,
+                    isLoading = false,
+                    isEmpty = data.isEmpty()
+                )
+            }catch (e: CancellationException){
+                throw e
+            }catch (e: Exception){
+                _uiState.value = HomeUiState(errorMsg = e.message ?: "Request Gagal")
+            }
+        }
+    }
+
+    fun refresh(){
+        val query = searchQuery.value
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, errorMsg = null)
+
+            try {
+                val data = if (query.isBlank()){
+                    repository.getStudents()
+                }else{
+                    repository.searchStudents(query)
+                }
+                _uiState.value = _uiState.value.copy(
+                    students = data,
+                    isLoading = false,
+                    isEmpty = data.isEmpty()
+                )
             }catch (e: CancellationException){
                 throw e
             }catch (e: Exception){
