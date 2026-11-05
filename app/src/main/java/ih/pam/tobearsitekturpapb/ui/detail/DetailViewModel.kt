@@ -13,12 +13,17 @@ class DetailViewModel(private val repository: StudentRepository) : ViewModel() {
         private set
 
     fun loadStudent(id: Int) {
-       uiState = uiState.copy(isLoading = true, errorMsg = null)
+        uiState = uiState.copy(isLoading = true, errorMsg = null)
 
-        repository.getStudentById(id){
-            result -> result.onSuccess { student -> uiState = DetailUiState(student = student) }.onFailure { error -> uiState =
-            DetailUiState(errorMsg = error.message ?: "Data tidak tersedia")
-        }
+        repository.getStudentById(id) { result ->
+            result
+                .onSuccess { student ->
+                    uiState = DetailUiState(student = student)
+                }
+                .onFailure { error ->
+                    uiState =
+                        DetailUiState(errorMsg = error.message ?: "Data tidak tersedia")
+                }
         }
     }
 

@@ -20,9 +20,15 @@ class HomeViewModel(
     fun fetchAllStudents() {
         uiState = uiState.copy(isLoading = true, errorMsg = null)
         repository.getStudents { result ->
-            result.onSuccess { data -> uiState = HomeUiState(students = data) }.onFailure { error ->
-                uiState = HomeUiState(errorMsg = error.message ?: "Gagal mengambil data")
-            }
+            result
+                .onSuccess { data ->
+                    uiState = HomeUiState(students = data)
+                }.onFailure { error ->
+                    uiState = HomeUiState(
+                        errorMsg = error.message ?: "Gagal mengambil data",
+                        isLoading = false
+                    )
+                }
         }
     }
 
