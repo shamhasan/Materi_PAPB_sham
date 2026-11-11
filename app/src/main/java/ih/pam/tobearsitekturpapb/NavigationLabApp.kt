@@ -2,7 +2,10 @@ package ih.pam.tobearsitekturpapb
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -36,13 +39,15 @@ fun NavigationLabApp() {
             val homeVM: HomeViewModel = viewModel(
                 factory = HomeViewModel.factory(repository)
             )
-            LaunchedEffect(Unit) { homeVM.fetchAllStudents() }
+            val uiState by homeVM.uiState.collectAsStateWithLifecycle()
+            val searchQuery by homeVM.searchQuery.collectAsStateWithLifecycle()
 
             HomeScreen(
-                uiState = homeVM.uiState,
+                uiState = uiState,
                 onStudentClick = {id-> navController.navigate(Routes.detail(id))},
-                onRetry = homeVM::fetchAllStudents,
-                onSearchClick = homeVM::searchStudents
+                onRetry = homeVM::retry,
+                onSearchQueryChange = homeVM::onSearchQueryChange,
+                searchQuery = searchQuery,
             )
         }
         composable(
@@ -58,14 +63,14 @@ fun NavigationLabApp() {
 
             val viewModelKita: DetailViewModel =
                 viewModel(factory = DetailViewModel.factory(repository))
-
-            LaunchedEffect(studentId) {
+            val uiState by viewModelKita.uiState.collectAsStateWithLifecycle()
+            LaunchedEffect(Unit) {
                 viewModelKita.loadStudent(studentId)
             }
 
             DetailScreen(
                 onBack = { navController.popBackStack() },
-                uiState = viewModelKita.uiState
+                uiState = uiState
             )
         }
         composable(Routes.PROFILE) {
