@@ -19,7 +19,8 @@ import ih.pam.tobearsitekturpapb.ui.detail.DetailUiState
 @Composable
 fun DetailScreen(
     uiState: DetailUiState,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    toggleFavorite: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -44,6 +45,17 @@ fun DetailScreen(
                     Text("University: ${data.university}")
                 }
             }
+        }
+        Button(
+            onClick = toggleFavorite
+        ) {
+            Text(
+                if (uiState.isFavorite)
+                    "Hapus dari Favorit"
+                else
+                    "Simpan ke Favorit"
+
+            )
         }
         Button(onClick = onBack) {
             Text("Kembali")

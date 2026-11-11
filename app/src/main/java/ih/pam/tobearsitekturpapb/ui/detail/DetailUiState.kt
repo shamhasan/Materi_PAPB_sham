@@ -6,4 +6,5 @@ data class DetailUiState(
     val student: Student? = null,
     val isLoading: Boolean = false,
     val errorMsg: String? = null,
+    val isFavorite: Boolean = false
 )
