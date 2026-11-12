@@ -60,6 +60,7 @@ fun loadStudent(id: Int) {
     }
 }
 
+
 companion object {
     fun factory(
         repository: StudentRepository,
