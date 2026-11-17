@@ -14,6 +14,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -34,6 +36,7 @@ fun HomeScreen(
     onSearchQueryChange: (String) -> Unit,
     onRetry: () -> Unit,
     onRefresh: () -> Unit,
+    onFavorite: () -> Unit
 ) {
     Scaffold() { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
@@ -46,6 +49,8 @@ fun HomeScreen(
                 )
                 Button(onRefresh) { Text("Refresh") }
             }
+            Spacer(modifier = Modifier.padding(8.dp))
+            Button(onClick = onFavorite) { Text("Favorite") }
             when {
                 uiState.isLoading -> {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

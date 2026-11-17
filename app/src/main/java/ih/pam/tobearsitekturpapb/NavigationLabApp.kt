@@ -20,10 +20,13 @@ import ih.pam.tobearsitekturpapb.data.remote.datasource.StudentRemoteDataSource
 import ih.pam.tobearsitekturpapb.data.repository.DefaultStudentRepository
 import ih.pam.tobearsitekturpapb.data.repository.FavoriteRepository
 import ih.pam.tobearsitekturpapb.ui.detail.DetailViewModel
+import ih.pam.tobearsitekturpapb.ui.favorites.FavoriteViewModel
 import ih.pam.tobearsitekturpapb.ui.home.HomeViewModel
 import ih.pam.tobearsitekturpapb.ui.screens.DetailScreen
+import ih.pam.tobearsitekturpapb.ui.screens.FavoriteScreen
 import ih.pam.tobearsitekturpapb.ui.screens.HomeScreen
 import ih.pam.tobearsitekturpapb.ui.screens.ProfileScreen
+import kotlinx.coroutines.flow.collect
 
 
 @Composable
@@ -63,7 +66,8 @@ fun NavigationLabApp() {
                 onRetry = homeVM::retry,
                 searchQuery = searchQuery,
                 onSearchQueryChange = homeVM::onSearchQueryChange,
-                onRefresh = homeVM::refresh
+                onRefresh = homeVM::refresh,
+                onFavorite = { navController.navigate(Routes.FAVORITES) }
             )
         }
         composable(
@@ -95,6 +99,23 @@ fun NavigationLabApp() {
         composable(Routes.PROFILE) {
             ProfileScreen(
                 onBack = { navController.popBackStack() }
+            )
+        }
+        composable(Routes.FAVORITES){
+            val favoriteVM: FavoriteViewModel = viewModel(
+                factory = FavoriteViewModel.factory(favoriteRepository, preferencesRepository)
+            )
+            val favoriteUiState by favoriteVM.uiState.collectAsStateWithLifecycle()
+            LaunchedEffect(Unit){
+                favoriteVM.fetchAllFavorites()
+            }
+            FavoriteScreen(
+                uiState = favoriteUiState,
+                onRetry = favoriteVM::fetchAllFavorites,
+                onRefresh = favoriteVM::fetchAllFavorites,
+                onBack = {navController.popBackStack()},
+                onStudentClick = { id -> navController.navigate(Routes.detail(id)) },
+                onSort = favoriteVM::changeSortOrder
             )
         }
     }
