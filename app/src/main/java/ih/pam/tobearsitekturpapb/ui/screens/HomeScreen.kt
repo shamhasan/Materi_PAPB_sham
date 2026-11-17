@@ -36,7 +36,8 @@ fun HomeScreen(
     onSearchQueryChange: (String) -> Unit,
     onRetry: () -> Unit,
     onRefresh: () -> Unit,
-    onFavorite: () -> Unit
+    onFavorite: () -> Unit,
+    onToggleLocation: () -> Unit,
 ) {
     Scaffold() { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
@@ -50,7 +51,12 @@ fun HomeScreen(
                 Button(onRefresh) { Text("Refresh") }
             }
             Spacer(modifier = Modifier.padding(8.dp))
-            Button(onClick = onFavorite) { Text("Favorite") }
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                Button(onClick = onFavorite) { Text("Favorite") }
+                Button(onClick = onToggleLocation) {
+                    Text("Buka Lokasi")
+                }
+            }
             when {
                 uiState.isLoading -> {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

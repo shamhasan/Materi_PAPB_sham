@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -13,7 +14,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.android.gms.location.LocationServices
 import ih.pam.tobearsitekturpapb.data.local.DatabaseProvider
+import ih.pam.tobearsitekturpapb.data.location.DefaultLocationRepository
 import ih.pam.tobearsitekturpapb.data.preferences.UserPreferencesRepository
 import ih.pam.tobearsitekturpapb.data.remote.RetrofitClient
 import ih.pam.tobearsitekturpapb.data.remote.datasource.StudentRemoteDataSource
@@ -22,9 +25,11 @@ import ih.pam.tobearsitekturpapb.data.repository.FavoriteRepository
 import ih.pam.tobearsitekturpapb.ui.detail.DetailViewModel
 import ih.pam.tobearsitekturpapb.ui.favorites.FavoriteViewModel
 import ih.pam.tobearsitekturpapb.ui.home.HomeViewModel
+import ih.pam.tobearsitekturpapb.ui.location.LocationViewModel
 import ih.pam.tobearsitekturpapb.ui.screens.DetailScreen
 import ih.pam.tobearsitekturpapb.ui.screens.FavoriteScreen
 import ih.pam.tobearsitekturpapb.ui.screens.HomeScreen
+import ih.pam.tobearsitekturpapb.ui.screens.LocationScreen
 import ih.pam.tobearsitekturpapb.ui.screens.ProfileScreen
 import kotlinx.coroutines.flow.collect
 
@@ -42,6 +47,14 @@ fun NavigationLabApp() {
             DatabaseProvider.getDatabase(
                 context
             ).favoriteStudentDao()
+        )
+    }
+    val locationRepository = remember {
+        val appContext = context.applicationContext
+        val locationClient = LocationServices.getFusedLocationProviderClient(appContext)
+        DefaultLocationRepository(
+            context = appContext,
+            client = locationClient
         )
     }
 
@@ -67,7 +80,8 @@ fun NavigationLabApp() {
                 searchQuery = searchQuery,
                 onSearchQueryChange = homeVM::onSearchQueryChange,
                 onRefresh = homeVM::refresh,
-                onFavorite = { navController.navigate(Routes.FAVORITES) }
+                onFavorite = { navController.navigate(Routes.FAVORITES) },
+                onToggleLocation = { navController.navigate(Routes.LOCATION) }
             )
         }
         composable(
@@ -101,22 +115,33 @@ fun NavigationLabApp() {
                 onBack = { navController.popBackStack() }
             )
         }
-        composable(Routes.FAVORITES){
+        composable(Routes.FAVORITES) {
             val favoriteVM: FavoriteViewModel = viewModel(
                 factory = FavoriteViewModel.factory(favoriteRepository, preferencesRepository)
             )
             val favoriteUiState by favoriteVM.uiState.collectAsStateWithLifecycle()
-            LaunchedEffect(Unit){
+            LaunchedEffect(Unit) {
                 favoriteVM.fetchAllFavorites()
             }
             FavoriteScreen(
                 uiState = favoriteUiState,
                 onRetry = favoriteVM::fetchAllFavorites,
                 onRefresh = favoriteVM::fetchAllFavorites,
-                onBack = {navController.popBackStack()},
+                onBack = { navController.popBackStack() },
                 onStudentClick = { id -> navController.navigate(Routes.detail(id)) },
                 onSort = favoriteVM::changeSortOrder
             )
+        }
+        composable(Routes.LOCATION) {
+            val locationVM: LocationViewModel = viewModel(
+                factory = LocationViewModel.factory(locationRepository)
+            )
+
+            LocationScreen(
+                viewModel = locationVM
+            )
+
+
         }
     }
 }
